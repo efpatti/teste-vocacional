@@ -1,13 +1,17 @@
+import { Profissao } from "./Profissao";
+
 export class AreaProfissional {
  nome: string;
- profissões: string[];
+ profissoes: Profissao[];
 
- constructor(nome: string, profissões: string[]) {
+ constructor(nome: string, profissoes: Profissao[]) {
   this.nome = nome;
-  this.profissões = profissões;
+  this.profissoes = profissoes;
  }
 
  getDescricao(): string {
-  return `Área de ${this.nome}: ${this.profissões.join(", ")}.`;
+  return `Área de ${this.nome}: ${this.profissoes
+   .map((p) => p.nome)
+   .join(", ")}.`;
  }
 }
