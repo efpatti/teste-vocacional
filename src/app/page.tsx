@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { AreaProfissional } from "../model/AreaProfissional";
-import { Profissao } from "../model/Profissao";
-import { Alternativa } from "../model/Alternativa";
-import { Pergunta } from "../model/Pergunta";
-import { TesteVocacional } from "../model/TesteVocacional";
+import { usePagination } from "@/hooks/usePagination";
+import { AreaProfissional } from "@/model/AreaProfissional";
+import { Profissao } from "@/model/Profissao";
+import { Alternativa } from "@/model/Alternativa";
+import { Pergunta } from "@/model/Pergunta";
+import { TesteVocacional } from "@/model/TesteVocacional";
 
 export default function Home() {
  const [resultado, setResultado] = useState<AreaProfissional | null>(null);
@@ -35,7 +36,6 @@ export default function Home() {
  ]);
 
  const perguntas: Pergunta[] = [
-  // INTERESSES
   new Pergunta(1, "O que você prefere fazer no tempo livre?", [
    new Alternativa("A", "Resolver quebra-cabeças ou jogos de lógica", exatas),
    new Alternativa("B", "Conversar sobre comportamento e emoções", humanas),
@@ -62,8 +62,6 @@ export default function Home() {
    ),
    new Alternativa("D", "Cria algo visual ou artístico", artes),
   ]),
-
-  // APTIDÕES
   new Pergunta(4, "Em qual dessas atividades você se sai melhor?", [
    new Alternativa("A", "Montar ou programar coisas", exatas),
    new Alternativa("B", "Discutir e argumentar ideias", humanas),
@@ -94,8 +92,6 @@ export default function Home() {
     artes
    ),
   ]),
-
-  // VALORES
   new Pergunta(7, "Qual dessas frases você mais se identifica?", [
    new Alternativa("A", "Gosto de entender como as coisas funcionam", exatas),
    new Alternativa("B", "Gosto de ouvir e ajudar as pessoas", humanas),
@@ -116,8 +112,6 @@ export default function Home() {
    ),
    new Alternativa("D", "Inspirar ou emocionar pessoas através da arte", artes),
   ]),
-
-  // PERSONALIDADE
   new Pergunta(9, "Você se considera...", [
    new Alternativa("A", "Racional e analítico", exatas),
    new Alternativa("B", "Comunicativo e empático", humanas),
@@ -138,8 +132,6 @@ export default function Home() {
    ),
    new Alternativa("D", "Cuidar da estética ou apresentação final", artes),
   ]),
-
-  // ESTILO DE VIDA
   new Pergunta(11, "Você se vê trabalhando mais em...", [
    new Alternativa("A", "Ambientes tecnológicos ou laboratoriais", exatas),
    new Alternativa("B", "Escritórios, escolas ou fóruns", humanas),
@@ -171,19 +163,28 @@ export default function Home() {
   const res = teste.calcularResultado();
   setResultado(res);
  };
+ const perguntasPorPagina = 2;
+ const {
+  paginaAtual,
+  totalPaginas,
+  itensVisiveis: perguntasVisiveis,
+  irParaProximaPagina,
+  irParaPaginaAnterior,
+ } = usePagination(perguntas, perguntasPorPagina);
 
  return (
   <main className="p-10 max-w-3xl mx-auto">
    <h1 className="text-3xl font-bold mb-8 text-center">
     Teste Vocacional Avançado
    </h1>
-   {perguntas.map((p) => (
+
+   {perguntasVisiveis.map((p) => (
     <div key={p.id} className="bg-white shadow p-4 mb-6 rounded">
      <div className="flex space-4 mb-2">
       <h3 className="font-bold">{p.id}.</h3>
       <p className="font-semibold">{p.texto}</p>
      </div>
-     {p.alternativas.map((alt: any) => (
+     {p.alternativas.map((alt) => (
       <label key={alt.letra} className="block mb-1">
        <input
         type="radio"
@@ -198,23 +199,44 @@ export default function Home() {
     </div>
    ))}
 
-   <div className="text-center">
+   <div className="flex justify-between items-center mt-6">
     <button
-     onClick={calcular}
-     className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+     disabled={paginaAtual === 0}
+     onClick={irParaPaginaAnterior}
+     className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 disabled:opacity-50"
     >
-     Ver Resultado
+     Anterior
     </button>
 
-    {resultado && (
-     <div className="mt-6 bg-green-100 p-4 rounded text-lg">
-      <p>
-       <strong>Área mais compatível:</strong> {resultado.nome}
-      </p>
-      <p>{resultado.getDescricao()}</p>
-     </div>
+    <span className="text-sm font-medium">
+     Página {paginaAtual + 1} de {totalPaginas}
+    </span>
+
+    {paginaAtual < totalPaginas - 1 ? (
+     <button
+      onClick={irParaProximaPagina}
+      className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+     >
+      Próxima
+     </button>
+    ) : (
+     <button
+      onClick={calcular}
+      className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
+     >
+      Ver Resultado
+     </button>
     )}
    </div>
+
+   {resultado && (
+    <div className="mt-6 bg-green-100 p-4 rounded text-lg">
+     <p>
+      <strong>Área mais compatível:</strong> {resultado.nome}
+     </p>
+     <p>{resultado.getDescricao()}</p>
+    </div>
+   )}
   </main>
  );
 }
