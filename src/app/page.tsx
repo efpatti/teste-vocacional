@@ -163,7 +163,7 @@ export default function Home() {
   const res = teste.calcularResultado();
   setResultado(res);
  };
- const perguntasPorPagina = 2;
+ const perguntasPorPagina = 1;
  const {
   paginaAtual,
   totalPaginas,
@@ -173,70 +173,76 @@ export default function Home() {
  } = usePagination(perguntas, perguntasPorPagina);
 
  return (
-  <main className="p-10 max-w-3xl mx-auto">
-   <h1 className="text-3xl font-bold mb-8 text-center">
-    Teste Vocacional Avançado
+  <main className="p-8 md:p-12 max-w-4xl mx-auto flex flex-col min-h-screen items-center justify-center bg-gray-50">
+   <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-8">
+    Teste Vocacional
    </h1>
 
-   {perguntasVisiveis.map((p) => (
-    <div key={p.id} className="bg-white shadow p-4 mb-6 rounded">
-     <div className="flex space-4 mb-2">
-      <h3 className="font-bold">{p.id}.</h3>
-      <p className="font-semibold">{p.texto}</p>
+   <div className="flex flex-col items-center w-full bg-white rounded-lg shadow-lg p-8">
+    {perguntasVisiveis.map((p) => (
+     <div
+      key={p.id}
+      className="w-full mb-6 min-h-[200px] max-w-3xl bg-gray-50 rounded-lg shadow-sm flex flex-col p-6"
+     >
+      <div className="flex items-center space-x-4 mb-4">
+       <h3 className="text-xl font-semibold text-gray-800">{p.id}.</h3>
+       <p className="text-lg text-gray-600">{p.texto}</p>
+      </div>
+      <div className="flex flex-col space-y-3 h-full justify-between">
+       {p.alternativas.map((alt) => (
+        <label
+         key={alt.letra}
+         className="flex items-center text-gray-700 text-sm"
+        >
+         <input
+          type="radio"
+          name={`pergunta-${p.id}`}
+          onChange={() => handleResposta(p.id, alt.area)}
+          checked={respostas[p.id]?.nome === alt.area.nome}
+          className="mr-3 text-blue-600 focus:ring-2 focus:ring-blue-400"
+         />
+         {alt.letra}) {alt.texto}
+        </label>
+       ))}
+      </div>
      </div>
-     {p.alternativas.map((alt) => (
-      <label key={alt.letra} className="block mb-1">
-       <input
-        type="radio"
-        name={`pergunta-${p.id}`}
-        onChange={() => handleResposta(p.id, alt.area)}
-        checked={respostas[p.id]?.nome === alt.area.nome}
-        className="mr-2"
-       />
-       {alt.letra}) {alt.texto}
-      </label>
-     ))}
+    ))}
+
+    <div className="flex justify-center items-center space-x-4 mt-8 w-full">
+     <button
+      disabled={paginaAtual === 0}
+      onClick={irParaPaginaAnterior}
+      className="px-6 py-2 rounded-md bg-gray-300 hover:bg-gray-400 disabled:opacity-50 text-gray-800 font-medium transition duration-200"
+     >
+      Anterior
+     </button>
+
+     {paginaAtual < totalPaginas - 1 ? (
+      <button
+       onClick={irParaProximaPagina}
+       className="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition duration-200"
+      >
+       Próxima
+      </button>
+     ) : (
+      <button
+       onClick={calcular}
+       className="px-6 py-2 rounded-md bg-green-500 text-white hover:bg-green-600 transition duration-200"
+      >
+       Ver Resultado
+      </button>
+     )}
     </div>
-   ))}
 
-   <div className="flex justify-between items-center mt-6">
-    <button
-     disabled={paginaAtual === 0}
-     onClick={irParaPaginaAnterior}
-     className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 disabled:opacity-50"
-    >
-     Anterior
-    </button>
-
-    <span className="text-sm font-medium">
-     Página {paginaAtual + 1} de {totalPaginas}
-    </span>
-
-    {paginaAtual < totalPaginas - 1 ? (
-     <button
-      onClick={irParaProximaPagina}
-      className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-     >
-      Próxima
-     </button>
-    ) : (
-     <button
-      onClick={calcular}
-      className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
-     >
-      Ver Resultado
-     </button>
+    {resultado && (
+     <div className="mt-8 bg-green-50 p-6 rounded-lg text-lg font-medium text-green-700 shadow-md">
+      <p>
+       <strong>Área mais compatível:</strong> {resultado.nome}
+      </p>
+      <p className="text-sm">{resultado.getDescricao()}</p>
+     </div>
     )}
    </div>
-
-   {resultado && (
-    <div className="mt-6 bg-green-100 p-4 rounded text-lg">
-     <p>
-      <strong>Área mais compatível:</strong> {resultado.nome}
-     </p>
-     <p>{resultado.getDescricao()}</p>
-    </div>
-   )}
   </main>
  );
 }
